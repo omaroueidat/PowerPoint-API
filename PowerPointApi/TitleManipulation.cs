@@ -1,46 +1,24 @@
-﻿using DocumentFormat.OpenXml;
-using DocumentFormat.OpenXml.Bibliography;
-using DocumentFormat.OpenXml.Office2010.PowerPoint;
-using DocumentFormat.OpenXml.Packaging;
+﻿using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Presentation;
-using DocumentFormat.OpenXml.Wordprocessing;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
-
+using System.Threading.Tasks;
 
 namespace PowerPointApi
 {
-    class Program
+    internal class TitleManipulation
     {
-        static void Main(string[] args)
-        {
-            // Path to input power point file
-            string inputFile = @"C:\Users\user\Desktop\WorkShop\.Net Development\Projects\PowerPointApi\PowerPointApi\AuxiTask.pptx";
-
-            // Opening the PowerPoint
-            PresentationDocument presentation = PresentationDocument.Open(inputFile, true);
-            PresentationPart presentationPart = presentation.PresentationPart;
-
-            // Get the first Slide
-            var firstSlide = presentationPart.SlideParts.ElementAt(0);
-
-            // write the title to the console
-            Console.WriteLine($"{EditSlideTilte(firstSlide, presentation, "Output Slide")}");
-
-
-        }
-
         /// <summary>
         /// This Method will Edit the Slide Title as required from task 1
         /// </summary>
         /// <param name="slidePart"></param>
         /// <param name="presnetationDocument"></param>
         /// <param name="newTitle"></param>
-        /// <returns>Either fail string message, or a success string message</returns>
-        static string EditSlideTilte(SlidePart slidePart, PresentationDocument presnetationDocument, string newTitle)
+        /// <returns>Boolean, true for success and false for failure</returns>
+        internal static bool EditSlideTilte(SlidePart slidePart, string newTitle)
         {
-            // Get the title shape of the slide
-
             // Get all shapes
             var shapes = slidePart.Slide.Descendants<Shape>();
             foreach (var shape in shapes)
@@ -63,18 +41,14 @@ namespace PowerPointApi
                             // Change the font to Beirut
                             ChangeTextFont(textBody, "Beirut");
 
-                            // Save the changes
-                            slidePart.Slide.Save();
-                            presnetationDocument.Save();
-
                             // Since the change was successfull then return a pleasing result
-                            return $"Title was changed from {oldTitle} to {newTitle}";
+                            return true;
                         }
 
                     }
                 }
             }
-            return "No Title Found";
+            return false;
         }
 
         /// <summary>
@@ -82,7 +56,7 @@ namespace PowerPointApi
         /// </summary>
         /// <param name="shape"></param>
         /// <returns>true if shape is title, <br>false otherwise</br></returns>
-        private static bool IsTitleShape(Shape shape)
+        internal static bool IsTitleShape(Shape shape)
         {
             var placeholder = shape.NonVisualShapeProperties.ApplicationNonVisualDrawingProperties.GetFirstChild<PlaceholderShape>();
 
@@ -103,7 +77,7 @@ namespace PowerPointApi
         private static bool IsChangedTitle(TextBody textBody, string newTitle)
         {
             var textElement = textBody.Descendants<DocumentFormat.OpenXml.Drawing.Text>().FirstOrDefault();
-            
+
             if (textElement is not null)
             {
                 textElement.Text = newTitle;
@@ -146,7 +120,7 @@ namespace PowerPointApi
         /// This Method changes the Font of a given textBody
         /// </summary>
         /// <param name="textBody"></param>
-        private static void ChangeTextFont(TextBody textBody, string newFont)
+        internal static void ChangeTextFont(TextBody textBody, string newFont)
         {
             // Get the Runs of the tesxtBody to access RunProperties
             var runs = textBody.Descendants<DocumentFormat.OpenXml.Drawing.Run>();
@@ -176,10 +150,8 @@ namespace PowerPointApi
                 {
                     latinFont.Typeface = newFont;
                 }
-                
-            }
 
-            
+            }
         }
     }
 }
